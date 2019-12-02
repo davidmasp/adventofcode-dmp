@@ -1,18 +1,17 @@
----
-title: "Day 2"
+# Day 2
 author: "David Mas"
 date: "2/12/2019"
-output: html_document
----
 ## Usage
 Convert script to README.md, run from console in the 2019 directory.
 There might be a better way to do this.
 
 
 ```r
-rmd_file = knitr::spin("2/script.R", knit = FALSE)
-knitr::knit(rmd_file,output = "2/README.md")
-fs::file_delete(rmd_file)
+if (interactive()){
+  rmd_file = knitr::spin("script.R", knit = FALSE)
+  knitr::knit(rmd_file,output = "README.md")
+  fs::file_delete(rmd_file)
+}
 ```
 
 ## Problem 1
@@ -118,15 +117,33 @@ lapply(test, gravity_assist_recursive)
 ```
 
 Finally process the input
+To do this, before running the program,
+*replace position 1 with the value 12*
+and replace *position 2 with the value 2*.
+What value is left at position 0 after the program halts?
 
 
 ```r
 dat = readr::read_lines("input.txt")
 x <- stringr::str_split(dat[[1]],pattern = ",")[[1]]
 x <- as.numeric(x)
+x[2] = 12
+x[3] = 2
 gravity_assist_recursive(x = x) -> res
-res = paste0(res,collapse = ",")
-clipr::write_clip(res)
+
+clipr::write_clip(res[1])
+```
+
+```
+## Warning in flat_str(content, breaks): Coercing content to character
+```
+
+```r
+res[1]
+```
+
+```
+## [1] 4023471
 ```
 
 ## Problem 2
