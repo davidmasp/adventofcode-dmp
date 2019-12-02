@@ -147,3 +147,32 @@ res[1]
 ```
 
 ## Problem 2
+Brute force solution
+
+
+```r
+reverse_gravity_assist <- function(x,res) {
+  x_original = x
+  for (i in 1:99){
+    for (j in 1:99){
+      x[2] = i # noun
+      x[3] = j # verb
+      res_out = gravity_assist_recursive(x = x)
+      if (res_out[1] == res){
+        return(100 * i + j)
+      } else{
+        x = x_original
+      }
+    }
+  }
+}
+
+reverse_gravity_assist(x,res = 19690720)
+```
+
+```
+## [1] 8051
+```
+
+I think there might be a better solution (non-brute forcing for this),
+however, in the solutions I found there was none.
