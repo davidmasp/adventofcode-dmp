@@ -1,49 +1,35 @@
 
 library(magrittr)
 
-transform_to_path <- function(path,start) {
 
-  values = stringr::str_extract(pattern = "[:digit:]+",
-                                string = path) %>% as.numeric()
-  total_points = sum(values)*2
-  final_idx = cumsum(values)
+### modyfied after seeing the implementation from here
+### https://github.com/akulumbeg/adventofcode/blob/master/2019/Day3.R
+### my original implementation was stupid and slow
+transform_to_path <- function(path) {
+  
+  steps = stringr::str_extract(pattern = "[:digit:]+",
+                               string = path) %>% as.numeric()
+  
   direction = stringr::str_extract(pattern = "^[R|L|U|D]",
                                    string = path)
-  sign =  dplyr::case_when(
+  dx =  dplyr::case_when(
     direction == "R" ~ 1,
     direction == "L" ~ -1,
+    direction == "U" ~ 0,
+    direction == "D" ~ 0
+  )
+  
+  dy =  dplyr::case_when(
+    direction == "R" ~ 0,
+    direction == "L" ~ 0,
     direction == "U" ~ 1,
     direction == "D" ~ -1
   )
-  dimension = dplyr::case_when(
-    direction == "R" ~ 1,
-    direction == "L" ~ 1,
-    direction == "U" ~ 2,
-    direction == "D" ~ 2
-  )
-
-  # long shot
-  values = values * sign
-
-  path_m = matrix(integer(total_points),ncol = 2)
-  initial_idx = 1
-  cpoint = start
-  for (i in 1:length(values)){
-    initial_point = cpoint[dimension[i]] +  sign[i]
-    final_points = initial_point:(initial_point + values[i] - sign[i] )
-
-    iidx = ifelse(i == 1,1,final_idx[i-1] + 1)
-    fidx = final_idx[i]
-    path_m[iidx:fidx,dimension[i]] = final_points
-
-    dim = c(1,2)
-    not_dim = dim[!dim == dimension[i]]
-    path_m[iidx:fidx,not_dim] = cpoint[not_dim]
-
-    cpoint = path_m[fidx,]
-  }
-
-  return(path_m)
+  
+  x = cumsum(rep(dx,steps))
+  y = cumsum(rep(dy,steps))
+  
+  data.frame(x,y)
 }
 
 manhattan <- function(v1,v2) {
@@ -53,31 +39,28 @@ manhattan <- function(v1,v2) {
 crossed_wires <- function(s1,s2) {
   # I think this really don't matter
   st_point = c(1,1)
-
-  mat1 = transform_to_path(s1,start = st_point)
-  mat2 = transform_to_path(s2,start = st_point)
-
-  match = apply(mat1,1, function(x){
-    which(apply(mat2,1, function(y){
-      all(y == x)}))}) %>% unlist()
-
-  min(apply(mat2[match,], 1, manhattan,v2 = st_point))
-
+  
+  mat1 = transform_to_path(s1)
+  mat2 = transform_to_path(s2)
+  
+  dplyr::inner_join(mat1,mat2) %>%
+    dplyr::mutate(manhattan = abs(x - 0) + abs(y-0)) %>% 
+    dplyr::pull(manhattan) %>% 
+    min()
 }
 
 plot_paths <- function(s1,s2){
-  st_point = c(1,1)
   
-  mat1 = transform_to_path(s1,start = st_point)
-  mat2 = transform_to_path(s2,start = st_point)
+  mat1 = transform_to_path(s1)
+  mat2 = transform_to_path(s2)
   
   library(ggplot2)
   mat1 %>% as.data.frame() %>% dplyr::mutate(lbl = 1:nrow(.),type = 1) -> m1df 
   mat2 %>% as.data.frame() %>% dplyr::mutate(lbl = 1:nrow(.),type = 2) -> m2df 
   
   fp = ggplot(rbind(m1df,m2df),
-         aes(x = V1,y = V2,
-             color = factor(type))) +
+              aes(x = x,y = y,
+                  color = factor(type))) +
     geom_text(aes(label = lbl))
   
   return(fp)
@@ -118,6 +101,19 @@ dat %>% purrr::map(stringr::str_split,
 crossed_wires(s1 = dat_list[[1]],
               s2 = dat_list[[2]])
 
+#' ploting takes foreevr so we are not gonna run that.
+#' 
+#' ## Problem 2
+#' 
+#' We are asked to return the shortest distance to the first crossing point.
 
-plot_paths(s1 = dat_list[[1]],
-           s2 = dat_list[[2]])
+shortest_path <- function(s1,s2) {
+  
+  mat1 = transform_to_path(s1)
+  mat2 = transform_to_path(s2)
+  
+  dplyr::inner_join(mat1,mat2) %>%
+    dplyr::mutate(manhattan = abs(x - 0) + abs(y-0)) %>% 
+    dplyr::pull(manhattan) %>% 
+    min()
+}
