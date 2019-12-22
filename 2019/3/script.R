@@ -110,10 +110,22 @@ crossed_wires(s1 = dat_list[[1]],
 shortest_path <- function(s1,s2) {
   
   mat1 = transform_to_path(s1)
+  mat1$steps = 1:nrow(mat1)
   mat2 = transform_to_path(s2)
+  mat2$steps = 1:nrow(mat2)
   
-  dplyr::inner_join(mat1,mat2) %>%
-    dplyr::mutate(manhattan = abs(x - 0) + abs(y-0)) %>% 
-    dplyr::pull(manhattan) %>% 
+  dplyr::inner_join(mat1,mat2,by = c("x","y"),suffix = c("_1","_2")) %>% 
+    dplyr::mutate(total = steps_1 + steps_2) %>% 
+    dplyr::pull(total) %>% 
     min()
 }
+
+string_1 = c("R98", "U47", "R26", "D63", "R33", "U87", "L62", "D20", "R33", "U53", "R51")
+string_2 = c("U98", "R91", "D20", "R16", "D67", "R40", "U7", "R15", "U6", "R7")
+
+shortest_path(s1 = string_1,
+           s2 = string_2)
+
+
+shortest_path(s1 = dat_list[[1]],
+              s2 = dat_list[[2]])
