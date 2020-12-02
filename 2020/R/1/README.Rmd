@@ -1,0 +1,36 @@
+---
+output:
+  github_document:
+    html_preview: false
+---
+
+# README
+
+```{r}
+
+# solution N
+report_repair <- function(int_vec, N = 2){
+  mat_comb = combn(int_vec,N)
+  sel_int = which(apply(mat_comb,2,sum) == 2020)
+  prod(mat_comb[,sel_int])
+}
+
+```
+
+Trying with test data.
+
+```{r}
+fname <-  "test.txt"
+int_vec <-  as.integer(readLines(fname))
+report_repair(int_vec)
+```
+Now with the real data.
+
+```{r}
+fname <-  "input.txt"
+int_vec <-  as.integer(readLines(fname))
+## prob 1
+report_repair(int_vec)
+## prob 2
+report_repair(int_vec,N = 3)
+```
