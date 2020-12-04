@@ -1,0 +1,58 @@
+---
+output:
+  github_document:
+    html_preview: false
+---
+
+# README
+
+```{r}
+library(magrittr)
+vroom::vroom(file = "test.tst", col_names = F) -> dat
+
+toboggan <- function(dat) {
+  dat %>%
+  tidyr::separate(X1, into = c("min","max")) %>% 
+  dplyr::mutate(min = as.integer(min),
+                max = as.integer(max)) %>% 
+  dplyr::mutate(letter = stringr::str_extract(X2,"[:alnum:](?=:)")) %>% 
+  dplyr::mutate(count = stringr::str_count(X3,pattern = letter)) %>% 
+  dplyr::mutate(isValid = count <= max & count >=min ) -> res
+  
+  sum(res$isValid)
+}
+
+toboggan(dat)
+
+```
+
+```{r}
+vroom::vroom(file = "input.txt", col_names = F) -> dat
+toboggan(dat)
+```
+
+
+
+```{r}
+toboggan2 <- function(dat) {
+  dat %>%
+  tidyr::separate(X1, into = c("p1","p2")) %>% 
+  dplyr::mutate(p1 = as.integer(p1),
+                p2 = as.integer(p2)) %>% 
+  dplyr::mutate(letter = stringr::str_extract(X2,"[:alnum:](?=:)")) %>% 
+  split(rownames(.)) %>% 
+    purrr::map_lgl(function(x){
+    
+      x$X3 %>% stringr::str_split("") -> tmp
+      mask = tmp[[1]][c(x$p1,x$p2)] == x$letter
+      sum(mask) == 1
+    }) -> res
+
+  sum(res)
+}
+
+
+toboggan2(dat)
+
+```
+

@@ -1,0 +1,14 @@
+---
+output:
+  github_document:
+    html_preview: false
+---
+
+# README
+
+
+```{r tmp2, echo=FALSE, message=FALSE, warning=FALSE, results = 'asis'}
+source("meta.R")
+knitr::kable(bench_mark)
+```
+
