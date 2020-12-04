@@ -5,7 +5,7 @@ render_all <- function() {
   exc = fs::path_dir(files)
   purrr::map2_df(files,exc,function(x,exc){
     bench::mark(
-      rmarkdown::render(input = x),iterations = 1
+      rmarkdown::render(input = x,quiet = TRUE),iterations = 1
     ) -> times
     times %>% 
       dplyr::select(min,median,mem_alloc) %>%
